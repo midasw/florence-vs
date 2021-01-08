@@ -1,0 +1,24 @@
+﻿@model ICollection<BackOffice_ASP.Models.Announcement>
+
+@{
+    ViewData["Title"] = "Delete";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <h2>Delete announcements</h2>
+    <hr />
+    <h5>Are you sure you want to delete @Model.Count announcement(s)?</h5>
+
+    <form method="post" asp-action="DeleteMultiple">
+        <input type="hidden" name="confirmed" value="true" />
+        @foreach (var item in Model)
+        {
+            <input type="hidden" name="checkedIds" value="@item.Id" />
+        }
+        <p class="mt-4">
+            <button type="submit" class="btn btn-danger">Yes, delete</button> |
+            <a asp-action="Index">Back to list</a>
+        </p>
+    </form>
+</div>

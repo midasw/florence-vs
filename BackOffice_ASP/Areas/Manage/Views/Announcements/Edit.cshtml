@@ -1,38 +1,27 @@
-﻿@model BackOffice_ASP.Models.Announcement
+﻿@model BackOffice_ASP.Areas.Manage.ViewModels.EditAnnouncementViewModel
 
 @{
-    ViewData["Title"] = "Edit Announcement";
+    ViewData["Title"] = "Edit announcement";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="container">
-    <h1>@ViewData["Title"]</h1>
-
-    <h4>@Model.Subject</h4>
+    <h2>@ViewData["Title"]</h2>
+    <h4 id="subjectHeading">@Model.Subject</h4>
     <hr />
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-9">
             <form asp-action="Edit">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <input type="hidden" asp-for="Id" />
                 <div class="form-group">
-                    <label asp-for="DateCreated" class="control-label"></label>
-                    <input asp-for="DateCreated" class="form-control" />
-                    <span asp-validation-for="DateCreated" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="DateEdited" class="control-label"></label>
-                    <input asp-for="DateEdited" class="form-control" />
-                    <span asp-validation-for="DateEdited" class="text-danger"></span>
-                </div>
-                <div class="form-group">
                     <label asp-for="Subject" class="control-label"></label>
-                    <input asp-for="Subject" class="form-control" />
+                    <input asp-for="Subject" class="form-control" onkeyup="$('#subjectHeading').text(this.value)" />
                     <span asp-validation-for="Subject" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="Body" class="control-label"></label>
-                    <textarea asp-for="Body" class="form-control" rows="20"></textarea>
+                    <textarea asp-for="Body" class="form-control js-markdown-editor" rows="20"></textarea>
                     <span asp-validation-for="Body" class="text-danger"></span>
                 </div>
                 <div class="form-group">
@@ -41,12 +30,19 @@
             </form>
         </div>
     </div>
-
     <div>
-        <a asp-action="Index">Back to List</a>
+        <a asp-action="Index">Back to list</a>
     </div>
 </div>
 
+@section Styles {
+    <link rel="stylesheet" href="~/lib/simplemde-markdown-editor/dist/simplemde.min.css">
+}
+
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/lib/simplemde-markdown-editor/dist/simplemde.min.js"></script>
+    <script>
+        var simplemde = new SimpleMDE();
+    </script>
 }

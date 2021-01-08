@@ -11,7 +11,7 @@
     ViewData["SubjectIconClass"] = SortOrder == "subject_asc" ? ArrowDownClassName :
                                    SortOrder == "subject_desc" ? ArrowUpClassName : null;
 
-    ViewData["DateIconClass"] = SortOrder == "date_desc" ? ArrowUpClassName :
+    ViewData["DateIconClass"] = SortOrder == "" ? ArrowUpClassName :
                                 SortOrder == "date_asc" ? ArrowDownClassName : null;
 
     ViewData["Title"] = "Announcements";
@@ -19,143 +19,126 @@
 }
 
 <div class="container">
-    <h1>@ViewData["Title"]</h1>
+    <p class="text-secondary m-0">Manage <i class="bi bi-caret-right-fill"></i></p>
+    <h2 class="pb-2">
+        <a asp-action="Index" class="text-dark">
+            @ViewData["Title"]
+        </a>
+    </h2>
+    <partial name="_StatusMessage" model="@TempData["StatusMessage"]" />
 </div>
-
 <div class="bg-light">
     <div class="container">
-        <div class="btn-toolbar justify-content-between px-2 py-3" role="toolbar" aria-label="Toolbar with button groups">
+        <div class="btn-toolbar justify-content-between py-3" role="toolbar" aria-label="Toolbar with button groups">
             <div class="btn-group" role="group">
                 <a asp-action="Create" class="btn btn-primary">
                     @*<i class="bi-plus-circle"></i>*@
-                    New Announcement
+                    New announcement
                 </a>
             </div>
-            <div class="input-group">
-                <form class="form-inline">
-                    <div class="input-group">
-                        <input class="form-control" type="search" placeholder="Search" aria-label="Search">
-                        <div class="input-group-append">
-                            <button class="btn btn-secondary" type="submit">Go</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
+            <form method="get" asp-action="Index" class="input-group w-50">
+                @if (!string.IsNullOrEmpty(ViewData["SortOrder"] as string))
+                {
+                    <input type="hidden" name="sorting" value="@ViewData["SortOrder"]" />
+                }
+                <input class="form-control" type="search" name="q" value="@ViewData["Search"]" placeholder="Search announcements" aria-label="Search">
+                <div class="input-group-append">
+                    <button class="btn btn-secondary" type="submit">Go</button>
+                </div>
+            </form>
             <div class="btn-group">
-                <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    With selected
+                <button type="button" class="btn btn-secondary dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    With selected <span id="js-selection-counter" class="badge badge-dark"></span>
                 </button>
-                <div class="dropdown-menu dropdown-menu-right">
-                    <button class="dropdown-item btn-secondary" type="button">Publish</button>
-                    <button class="dropdown-item btn-secondary" type="button">Unpublish</button>
-                    <button class="dropdown-item btn-secondary text-danger" type="button">Delete</button>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                    <button onclick="$('#btnPublish').click()" class="dropdown-item btn-secondary" type="button">Publish</button>
+                    <button onclick="$('#btnUnpublish').click()" class="dropdown-item btn-secondary" type="button">Unpublish</button>
+                    <div class="dropdown-divider"></div>
+                    <button onclick="$('#btnDelete').click()" class="dropdown-item btn-secondary text-danger" type="button">Delete</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<div class="container">
-    <table class="table table-hover js-table-check">
-        <thead>
-            <tr>
-                <th height="1" class="px-0">
-                    <label class="d-block h-100 px-2 mb-0 text-center">
-                        <input type="checkbox" class="align-middle">
-                    </label>
-                </th>
-                <th>
-                    <a asp-action="Index" asp-route-sorting="@ViewData["SubjectSortParm"]">
-                        @Html.DisplayNameFor(model => model.Subject)
-                        @if (ViewData["SubjectIconClass"] != null)
-                        {
-                            <i class="@ViewData["SubjectIconClass"]"></i>
-                        }
-                    </a>
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Body)
-                </th>
-                <th>
-                    <a asp-action="Index" asp-route-sorting="@ViewData["DateSortParm"]">
-                        Last Edit
-                        @if (ViewData["DateIconClass"] != null)
-                        {
-                            <i class="@ViewData["DateIconClass"]"></i>
-                        }
-                    </a>
-                </th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr class="@(!item.Published ? "text-muted" : "")">
-                    <td height="1" class="px-0">
-                        <label class="d-block h-100 px-2 mb-0 text-center">
+<form method="post" asp-action="Index">
+    <div class="container pt-2">
+        <table class="table table-hover js-table-check">
+            <thead>
+                <tr>
+                    <th height="1" class="px-0">
+                        <label class="d-block px-2 mb-0 text-center">
                             <input type="checkbox" class="align-middle">
                         </label>
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Subject)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Body)
-                    </td>
-                    <td>
-                        <time datetime="@item.DateEdited" title="@item.DateEdited">
-                            @item.DateEdited.TimeAgo()
-                        </time>
-                    </td>
-                    <td class="text-right">
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                        @*<a asp-action="Details" asp-route-id="@item.Id">Details</a> |*@
-                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                    </td>
+                    </th>
+                    <th>
+                        <a asp-action="Index" asp-route-sorting="@ViewData["SubjectSortParm"]" asp-route-q="@ViewData["Search"]">
+                            @Html.DisplayNameFor(model => model.Subject)
+                            @if (ViewData["SubjectIconClass"] != null)
+                            {
+                                <i class="bi @ViewData["SubjectIconClass"]"></i>
+                            }
+                        </a>
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Body)
+                    </th>
+                    <th>
+                        <a asp-action="Index" asp-route-sorting="@ViewData["DateSortParm"]" asp-route-q="@ViewData["Search"]">
+                            Last
+                            <span class="text-nowrap">
+                                Edit
+                                @if (ViewData["DateIconClass"] != null)
+                                {
+                                    <i class="bi @ViewData["DateIconClass"]"></i>
+                                }
+                            </span>
+                        </a>
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.IsPublished)
+                    </th>
+                    <th></th>
                 </tr>
-            }
-        </tbody>
-    </table>
-</div>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    var writer = (item.IsEdited && item.Editor != null) ? item.Editor : item.Author;
 
-<script>
-    $(function () {
-        let $tables = $(".js-table-check");
-
-        $tables.each(function (i, table) {
-            let $tbody = $('tbody', table);
-            let $checkAll = $("thead input[type='checkbox']", table).first();
-
-            $tbody.on('change', "input[type='checkbox']", function () {
-                $(this).closest('tr').toggleClass("table-active", this.checked);
-
-                let $checks = $("input[type='checkbox']", $tbody);
-
-                if (this.checked && $checks.not(':checked').length === 0) {
-                    $checkAll.prop({
-                        indeterminate: false,
-                        checked: true
-                    });
+                    <tr class="@(!item.IsPublished ? "text-muted" : "")">
+                        <td height="1" class="px-0">
+                            <label class="d-block h-100 px-2 mb-0 text-center">
+                                <input type="checkbox" name="checkedIds" value="@item.Id" class="align-middle">
+                            </label>
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Subject)
+                        </td>
+                        <td>
+                            <small>@item.Body.TruncateWithEllipsis(80)</small>
+                        </td>
+                        <td>
+                            <partial name="_PicBadge" model="writer" />
+                            <time datetime="@item.DateEdited" title="@item.DateEdited">
+                                @item.DateEdited.TimeAgo()
+                            </time>
+                        </td>
+                        <td>
+                            @(item.IsPublished ? "Yes" : "No")
+                        </td>
+                        <td class="text-right">
+                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                            @*<a asp-action="Details" asp-route-id="@item.Id">Details</a> |*@
+                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        </td>
+                    </tr>
                 }
-                else if ($checks.filter(':checked').length === 0) {
-                    $checkAll.prop({
-                        indeterminate: false,
-                        checked: false
-                    });
-                }
-                else {
-                    $checkAll.prop({
-                        indeterminate: true,
-                        checked: false
-                    });
-                }
-            });
-
-            $checkAll.on('change', function () {
-                $("input[type='checkbox']", $tbody).prop('checked', this.checked);
-                $('tr', $tbody).toggleClass("table-active", this.checked);
-            });
-        });
-    });
-</script>
+            </tbody>
+        </table>
+    </div>
+    <div class="noscript-visible">
+        <button type="submit" name="button" class="btn-secondary" id="btnPublish" value="publish">Publish</button>
+        <button type="submit" name="button" class="btn-secondary" id="btnUnpublish" value="unpublish">Unpublish</button>
+        <button type="submit" name="button" class="btn-secondary text-danger" id="btnDelete" value="delete">Delete</button>
+    </div>
+</form>
