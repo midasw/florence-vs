@@ -33,6 +33,7 @@ namespace BackOffice_ASP.Controllers
                 .Include(a => a.Author)
                 .Include(a => a.Editor)
                 .OrderByDescending(a => a.DateEdited)
+                .Take(5)
                 .ToListAsync();
 
             return View(new DashboardViewModel

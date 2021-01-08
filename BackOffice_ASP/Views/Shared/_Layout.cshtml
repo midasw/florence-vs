@@ -39,7 +39,7 @@
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="~/img/logo-florence-100.png" height="50" width="24" class="d-inline-block mr-2" alt="">
+                    <img src="~/img/logo-florence-100.png" height="50" width="24" class="d-inline-block ml-1 mr-2" alt="">
                     <span class="align-middle">Back Office</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -62,7 +62,7 @@
                                 </li>
                             }
 
-                            if (User.IsInRole("Super") || User.IsInRole("Visibility"))
+                            if (User.IsInRole("Super") || User.IsInRole("Visibility") || User.IsInRole("Admin") || User.IsInRole("Fleco"))
                             {
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle@(areaName == "Manage" ? activeClassName : "")" href="#" id="manageDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -70,7 +70,10 @@
                                     </a>
                                     <div class="dropdown-menu" aria-labelledby="manageDropdown">
                                         <a class="dropdown-item" asp-area="Manage" asp-controller="Announcements" asp-action="Index">Announcements</a>
-                                        <a class="dropdown-item" asp-area="Manage" asp-controller="Users" asp-action="Index">Users</a>
+                                        @if (User.IsInRole("Super") || User.IsInRole("Visibility"))
+                                        {
+                                            <a class="dropdown-item" asp-area="Manage" asp-controller="Users" asp-action="Index">Users</a>
+                                        }
                                         @*<a class="dropdown-item" href="#">Another action</a>
                                             <div class="dropdown-divider"></div>
                                             <a class="dropdown-item" href="#">Something else here</a>*@

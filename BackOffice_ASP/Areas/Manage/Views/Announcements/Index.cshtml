@@ -19,7 +19,7 @@
 }
 
 <div class="container">
-    <p class="text-secondary m-0">Manage <i class="bi bi-caret-right-fill"></i></p>
+    <p class="text-secondary mt-4 mb-0">Manage <i class="bi bi-caret-right-fill"></i></p>
     <h2 class="pb-2">
         <a asp-action="Index" class="text-dark">
             @ViewData["Title"]
@@ -115,7 +115,7 @@
                             @Html.DisplayFor(modelItem => item.Subject)
                         </td>
                         <td>
-                            <small>@item.Body.TruncateWithEllipsis(80)</small>
+                            <small>@item.GetStrippedBody().TruncateWithEllipsis(80)</small>
                         </td>
                         <td>
                             <partial name="_PicBadge" model="writer" />

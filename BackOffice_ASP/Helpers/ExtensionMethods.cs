@@ -78,7 +78,7 @@ namespace BackOffice_ASP.Helpers
         {
             if (value.Length > maxLength)
             {
-                return value.Substring(0, maxLength - 1) + HttpUtility.HtmlDecode("&hellip;");
+                return value.Substring(0, maxLength - 2) + HttpUtility.HtmlDecode(" &hellip;");
             }
             else
             {

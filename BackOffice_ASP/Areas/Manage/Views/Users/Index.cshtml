@@ -1,12 +1,162 @@
-﻿@{
+﻿@model IEnumerable<BackOffice_ASP.Models.ApplicationUser>
+
+@{
+    string SortOrder = ViewData["SortOrder"] as string;
+    string ArrowUpClassName = "bi-arrow-up";
+    string ArrowDownClassName = "bi-arrow-down";
+
+    ViewData["FirstNameSortParm"] = SortOrder == "firstname_asc" ? "firstname_desc" : "firstname_asc";
+    ViewData["LastNameSortParm"] = SortOrder == "lastname_asc" ? "lastname_desc" : "lastname_asc";
+    ViewData["CountryNameSortParm"] = SortOrder == "country_asc" ? "country_desc" : "country_asc";
+    ViewData["DateJoinedSortParm"] = SortOrder == "date_asc" ? "" : "date_asc";
+
+    ViewData["FirstNameIconClass"] = SortOrder == "firstname_asc" ? ArrowDownClassName :
+                                     SortOrder == "firstname_desc" ? ArrowUpClassName : null;
+    ViewData["LastNameIconClass"] = SortOrder == "lastname_asc" ? ArrowDownClassName :
+                                    SortOrder == "lastname_desc" ? ArrowUpClassName : null;
+    ViewData["CountryNameIconClass"] = SortOrder == "country_asc" ? ArrowDownClassName :
+                                       SortOrder == "country_desc" ? ArrowUpClassName : null;
+    ViewData["DateJoinedIconClass"] = SortOrder == "" ? ArrowUpClassName :
+                                      SortOrder == "date_asc" ? ArrowDownClassName : null;
+
     ViewData["Title"] = "Users";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="container">
+    <p class="text-secondary mt-4 mb-0">Manage <i class="bi bi-caret-right-fill"></i></p>
     <h2 class="pb-2">
-        <a asp-action="Index">
+        <a asp-action="Index" class="text-dark">
             @ViewData["Title"]
         </a>
     </h2>
+    <partial name="_StatusMessage" model="@TempData["StatusMessage"]" />
 </div>
+<div class="bg-light">
+    <div class="container">
+        <div class="btn-toolbar justify-content-between py-3" role="toolbar" aria-label="Toolbar with button groups">
+            <div class="btn-group" role="group">
+                <a asp-action="Create" class="btn btn-primary">
+                    New user
+                </a>
+            </div>
+            <form method="get" asp-action="Index" class="input-group w-50">
+                @if (!string.IsNullOrEmpty(ViewData["SortOrder"] as string))
+                {
+                    <input type="hidden" name="sorting" value="@ViewData["SortOrder"]" />
+                }
+                <input class="form-control" type="search" name="q" value="@ViewData["Search"]" placeholder="Search users" aria-label="Search">
+                <div class="input-group-append">
+                    <button class="btn btn-secondary" type="submit">Go</button>
+                </div>
+            </form>
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    With selected <span id="js-selection-counter" class="badge badge-dark"></span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                    <button onclick="$('#btnDelete').click()" class="dropdown-item btn-secondary text-danger" type="button">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<form method="post" asp-action="Index">
+    <div class="container pt-2">
+        <table class="table table-hover js-table-check">
+            <thead>
+                <tr>
+                    <th height="1" class="px-0">
+                        <label class="d-block px-2 mb-0 text-center">
+                            <input type="checkbox" class="align-middle">
+                        </label>
+                    </th>
+                    <th>
+                        <a asp-action="Index" asp-route-sorting="@ViewData["FirstNameSortParm"]" asp-route-q="@ViewData["Search"]">
+                            @Html.DisplayNameFor(model => model.FirstName)
+                            @if (ViewData["FirstNameIconClass"] != null)
+                            {
+                                <i class="bi @ViewData["FirstNameIconClass"]"></i>
+                            }
+                        </a>
+                    </th>
+                    <th>
+                        <a asp-action="Index" asp-route-sorting="@ViewData["LastNameSortParm"]" asp-route-q="@ViewData["Search"]">
+                            @Html.DisplayNameFor(model => model.LastName)
+                            @if (ViewData["LastNameIconClass"] != null)
+                            {
+                                <i class="bi @ViewData["LastNameIconClass"]"></i>
+                            }
+                        </a>
+                    </th>
+                    <th>
+                        Role
+                    </th>
+                    <th>
+                        <a asp-action="Index" asp-route-sorting="@ViewData["CountryNameSortParm"]" asp-route-q="@ViewData["Search"]">
+                            @Html.DisplayNameFor(model => model.Country)
+                            @if (ViewData["CountryNameIconClass"] != null)
+                            {
+                                <i class="bi @ViewData["CountryNameIconClass"]"></i>
+                            }
+                        </a>
+                    </th>
+                    <th>
+                        <a asp-action="Index" asp-route-sorting="@ViewData["DateJoinedSortParm"]" asp-route-q="@ViewData["Search"]">
+                            Join
+                            <span class="text-nowrap">
+                                date
+                                @if (ViewData["DateJoinedIconClass"] != null)
+                                {
+                                    <i class="bi @ViewData["DateJoinedIconClass"]"></i>
+                                }
+                            </span>
+                        </a>
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr class="@(!item.EmailConfirmed ? "text-muted" : "")">
+                        <td height="1" class="px-0">
+                            <label class="d-block h-100 px-2 mb-0 text-center">
+                                <input type="checkbox" name="checkedIds" value="@item.Id" class="align-middle">
+                            </label>
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.FirstName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.LastName)
+                        </td>
+                        <td>
+                            @if (item.UserRoles.Count >= 1)
+                            {
+                                @item.UserRoles.ToArray()[0].Role.Description
+                            }
+                        </td>
+                        <td>
+                            @if (item.Country != null)
+                            {
+                                <i class="flag @item.Country.Code"></i>
+                                @Html.DisplayFor(modelItem => item.Country.Name)
+                            }
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.DateJoined)
+                        </td>
+                        <td class="text-right">
+                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="noscript-visible">
+        <button type="submit" name="button" class="btn-secondary text-danger" id="btnDelete" value="delete">Delete</button>
+    </div>
+</form>

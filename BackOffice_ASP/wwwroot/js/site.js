@@ -54,11 +54,15 @@ $(function () {
                                         <p class="card-title m-0">'+ user.firstName + ' ' + user.lastName + '</p>\
                                         <p class="card-text">\
                                             <small class="text-muted">' + roleDescription + '</small>\
-                                        </p>\
-                                        <p class="card-text m-0">\
-                                            <small><span class="mr-1">Country:</span> <i class="flag ' + user.country.code + '"></i> ' + user.country.name + '</small>\
-                                        </p>\
-                                        <p class="card-text">\
+                                        </p>';
+
+                    if (user.country != null) {
+                        html += '<p class="card-text m-0">\
+                    <small><span class="mr-1">Country:</span> <i class="flag ' + user.country.code + '"></i> ' + user.country.name + '</small>\
+                                        </p>';
+                    }
+
+                    html += '<p class="card-text">\
                                             <small><span class="mr-1">Member since:</span> ' + new Date(user.dateJoined).getFullYear() + '</small>\
                                         </p>\
                                     </div >\
@@ -100,7 +104,7 @@ $(function () {
     $(document).on("mouseleave", ".hover-card", function () {
         var self = this;
         clearTimeout(debounce);
-        debounce = setTimeout(function (){
+        debounce = setTimeout(function () {
             $(self).stop().remove();
         }, hideDelay);
     });

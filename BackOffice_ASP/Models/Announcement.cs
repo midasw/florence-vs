@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using HtmlAgilityPack;
 using MarkdownDeep;
 
 namespace BackOffice_ASP.Models
@@ -33,12 +34,27 @@ namespace BackOffice_ASP.Models
 
         public void ParseMarkdown()
         {
-            var markdown = new Markdown();
-
-            markdown.ExtraMode = true;
-            markdown.SafeMode = true;
-
-            BodyParsed = markdown.Transform(Body);
+            BodyParsed = _markdown.Transform(Body);
         }
+
+        public string GetStrippedBody()
+        {
+            _htmlDoc.LoadHtml(BodyParsed);
+            string result = _htmlDoc.DocumentNode.InnerText;
+
+            return result;
+        }
+
+        static Announcement()
+        {
+            _htmlDoc = new HtmlDocument();
+
+            _markdown = new Markdown();
+            _markdown.ExtraMode = true;
+            _markdown.SafeMode = true;
+        }
+
+        private static HtmlDocument _htmlDoc;
+        private static Markdown _markdown;
     }
 }

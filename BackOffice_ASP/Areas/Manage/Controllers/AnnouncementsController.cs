@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Identity;
 namespace BackOffice_ASP.Areas.Manage.Controllers
 {
     [Area("Manage")]
-    [Authorize(Roles = "Super,Visibility,Fleco")]
+    [Authorize(Roles = "Super,Visibility,Admin,Fleco")]
     public class AnnouncementsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -112,24 +112,6 @@ namespace BackOffice_ASP.Areas.Manage.Controllers
             }
 
             return Redirect(HttpContext.Request.Headers["Referer"]);
-        }
-
-        // GET: manage/announcements/details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var announcement = await _context.Announcements
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (announcement == null)
-            {
-                return NotFound();
-            }
-
-            return View(announcement);
         }
 
         // GET: manage/announcements/create
@@ -252,42 +234,6 @@ namespace BackOffice_ASP.Areas.Manage.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Publish(List<int> checkedIds)
-        //{
-        //    _context.Announcements
-        //        .Where(a => checkedIds.Contains(a.Id))
-        //        .ToList()
-        //        .ForEach(a => a.Published = true);
-
-        //    int nRows = await _context.SaveChangesAsync();
-        //    if (nRows > 0)
-        //    {
-        //        TempData["Message"] = $"Successfully published {nRows} announcement(s)";
-        //    }
-
-        //    return Redirect(HttpContext.Request.Headers["Referer"]);
-        //}
-
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Unpublish(List<int> checkedIds)
-        //{
-        //    _context.Announcements
-        //        .Where(a => checkedIds.Contains(a.Id))
-        //        .ToList()
-        //        .ForEach(a => a.Published = false);
-
-        //    int nRows = await _context.SaveChangesAsync();
-        //    if (nRows > 0)
-        //    {
-        //        TempData["Message"] = $"Successfully unpublished {nRows} announcement(s)";
-        //    }
-
-        //    return Redirect(HttpContext.Request.Headers["Referer"]);
-        //}
 
         // POST: manage/announcements/deletemultiple
         [HttpPost]
