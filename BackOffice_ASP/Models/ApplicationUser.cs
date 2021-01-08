@@ -7,11 +7,21 @@ namespace BackOffice_ASP.Models
 {
     public class ApplicationUser : IdentityUser
     {
+        public DateTime DateJoined { get; set; } = DateTime.Now;
+
         [PersonalData]
         public string FirstName { get; set; }
 
         [PersonalData]
         public string LastName { get; set; }
+
+        public string FullName
+        {
+            get
+            {
+                return $"{FirstName} {LastName}";
+            }
+        }
 
         [PersonalData]
         [DataType(DataType.MultilineText)]
@@ -29,5 +39,22 @@ namespace BackOffice_ASP.Models
 
         [PersonalData]
         public Country Country { get; set; }
+
+        public string Avatar { get; set; }
+
+        public string AvatarUrl
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(Avatar))
+                {
+                    return "/uploads/" + Avatar;
+                }
+
+                return "/img/default-avatar-300x300.png";
+            }
+        }
+
+        public virtual ICollection<ApplicationUserRole> UserRoles { get; set; }
     }
 }
