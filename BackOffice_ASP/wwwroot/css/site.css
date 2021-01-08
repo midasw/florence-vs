@@ -70,25 +70,59 @@ body {
   line-height: 60px; /* Vertically center the text there */
 }
 
+/* Custom styles
+-------------------------------------------------- */
 /* Always show vertical scrollbar */
 body {
     overflow-y: scroll;
+}
+.noscript-visible {
+    display: none;
+}
+.bi {
+    position: relative;
+    top: -0.1rem;
+}
+.pic-badge {
+    cursor: pointer;
+}
+.hover-card {
+    line-height: 1.1;
+}
+.hover-card .card-body {
+    width: 180px;
+}
+i.flag {
+    margin: 0 !important;
+    position: relative;
+    top: 0.05rem;
+}
+.table td.fit,
+.table th.fit {
+    white-space: nowrap;
+    width: 1%;
+}
+
+table {
+    margin-bottom: 1rem;
+}
+.article-body td, .article-body th {
+    border: 1px solid #dee2e6;
+    padding: .25rem .75rem;
 }
 
 /* Bootstrap overrides */
 .table thead th {
     border-top: none;
 }
-
 .table-hover tbody tr.table-active {
     background: none !important;
 }
-
 .table-hover tbody tr:hover,
 .table-hover tbody tr.table-active:hover {
     background-color: rgba(0, 0, 0, 0.025) !important;
 }
-
 .table-hover tbody tr.table-active > td {
     background-color: rgba(0, 0, 0, 0.05) !important;
 }
+/* End Bootstrap overrides */
