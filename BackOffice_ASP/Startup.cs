@@ -1,4 +1,5 @@
 using BackOffice_ASP.Data;
+using BackOffice_ASP.Helpers;
 using BackOffice_ASP.Models;
 using BackOffice_ASP.Services;
 using Microsoft.AspNetCore.Builder;
@@ -13,9 +14,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace BackOffice_ASP
@@ -31,43 +35,51 @@ namespace BackOffice_ASP
 
         private async Task CreateUserRoles(IServiceProvider serviceProvider)
         {
-            //initializing custom roles 
-            var RoleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var RoleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
             var UserManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            string[] roleNames = { "Super", "Admin", "Visibility", "Fleco", "Student" };
+
+            var roles = new Dictionary<string, string>
+            {
+                { "Super",      "Superuser" },
+                { "Admin",      "Administrator" },
+                { "Visibility", "Visibility Manager" },
+                { "Fleco",      "Fl-eco" },
+                { "Student",    "Student" }
+            };
+
             IdentityResult roleResult;
 
-            foreach (var roleName in roleNames)
+            foreach (var role in roles)
             {
-                var roleExist = await RoleManager.RoleExistsAsync(roleName);
+                var roleExist = await RoleManager.RoleExistsAsync(role.Key);
                 if (!roleExist)
                 {
                     //create the roles and seed them to the database
-                    roleResult = await RoleManager.CreateAsync(new IdentityRole(roleName));
+                    roleResult = await RoleManager.CreateAsync(new ApplicationRole(role.Key, role.Value));
                 }
             }
 
-            var superUser = await UserManager.FindByEmailAsync(Configuration["SuperUser:Email"]);
+            var superuser = await UserManager.FindByEmailAsync(Configuration["Superuser:Email"]);
 
-            if (superUser == null)
+            if (superuser == null)
             {
                 var user = new ApplicationUser
                 {
-                    UserName = Configuration["SuperUser:UserName"],
-                    Email = Configuration["SuperUser:Email"],
+                    UserName = Configuration["Superuser:UserName"],
+                    Email = Configuration["Superuser:Email"],
                     EmailConfirmed = true
                 };
 
-                var task = await UserManager.CreateAsync(user, Configuration["SuperUser:Password"]);
+                var task = await UserManager.CreateAsync(user, Configuration["Superuser:Password"]);
                 if (task.Succeeded)
                 {
-                    superUser = user;
+                    superuser = user;
                 }
             }
 
-            if (superUser != null)
+            if (superuser != null)
             {
-                await UserManager.AddToRoleAsync(superUser, "Super");
+                await UserManager.AddToRoleAsync(superuser, "Super");
             }
         }
 
@@ -84,10 +96,14 @@ namespace BackOffice_ASP
             {
                 options.SignIn.RequireConfirmedAccount = true;
             })
-                .AddRoles<IdentityRole>()
+                .AddRoles<ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.AddControllersWithViews();
+            services.AddControllersWithViews()
+                .AddNewtonsoftJson(options =>
+                {
+                    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                });
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -108,6 +124,55 @@ namespace BackOffice_ASP
                 options.User.AllowedUserNameCharacters =
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
                 options.User.RequireUniqueEmail = true;
+            });
+
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+
+            var appSettings = Configuration.GetSection("AppSettings").Get<AppSettings>();
+            var key = Encoding.ASCII.GetBytes(appSettings.Secret);
+            services.AddAuthentication()
+                .AddJwtBearer(x =>
+                {
+                    x.RequireHttpsMetadata = false;
+                    x.SaveToken = true;
+                    x.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(key),
+                        ValidateIssuer = false,
+                        ValidateAudience = false
+                    };
+                });
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+
+                var security = new Dictionary<string, IEnumerable<string>>
+                {
+                    {"Bearer", new string[0]}
+                };
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme.",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    new string[] { }
+                }
+                });
             });
 
             // Add DI for email service
@@ -144,6 +209,13 @@ namespace BackOffice_ASP
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Back Office API");
+            });
 
             app.UseRouting();
 
