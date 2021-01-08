@@ -1,0 +1,49 @@
+﻿@model BackOffice_ASP.Models.Announcement
+
+@using BackOffice_ASP.Helpers;
+
+@{
+    ViewData["Title"] = Model.Subject;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="card my-5">
+        <div class="card-header">
+            <h3 class="font-weight-normal">
+                @Html.DisplayFor(model => model.Subject)
+            </h3>
+            <div>
+                <partial name="_PicBadge" model="Model.Author" view-data='@new ViewDataDictionary(ViewData) { { "size", 40 } }' />
+                @Html.DisplayFor(model => model.Author.FullName)
+                <small>
+                    -
+                    <time datetime="@Model.DateCreated" title="@Model.DateCreated">
+                        @String.Format("{0:dddd, d MMMM yyyy}", Model.DateCreated)
+                    </time>
+                </small>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <div class="article-body mb-4">
+                @Html.Raw(Model.BodyParsed)
+            </div>
+            @if (Model.IsEdited && Model.Editor != null)
+            {
+                <hr>
+                <p class="m-0">
+                    <small>
+                        <partial name="_PicBadge" model="Model.Editor" />
+                        @Html.DisplayFor(model => model.Editor.FirstName)
+                        <span class="text-secondary">
+                            edited this
+                            <time datetime="@Model.DateEdited" title="@Model.DateEdited">
+                                @Model.DateEdited.TimeAgo()
+                            </time>
+                        </span>
+                    </small>
+                </p>
+            }
+        </div>
+    </div>
+</div>
