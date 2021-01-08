@@ -1,7 +1,23 @@
-﻿@{
+﻿@model BackOffice_ASP.ViewModels.DashboardViewModel
+@{
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Dashboard</h1>
+<div class="container">
+    <div class="text-center mb-4">
+        <h1 class="display-4">Dashboard</h1>
+    </div>
+    <div class="row">
+        <div class="col-sm-7">
+            <partial name="Partials/_AnnouncementsPartial" model="@Model.Announcements" />
+        </div>
+        <div class="col-sm-5">
+            <partial name="Partials/_LinksPartial" />
+        </div>
+    </div>
 </div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/lib/fontawesome-free-5.15.1-web/css/fontawesome.min.css" />
+    <link rel="stylesheet" href="~/lib/fontawesome-free-5.15.1-web/css/solid.min.css" />
+}

@@ -1,7 +1,21 @@
-﻿@{
+﻿@using Microsoft.Extensions.Options;
+@using Microsoft.AspNetCore.Identity
+@using BackOffice_ASP.Helpers;
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IOptions<AppSettings> Options
+
+@{
     var areaName = ViewContext.RouteData.Values["area"] as string;
     var controllerName = ViewContext.RouteData.Values["controller"] as string;
     var activeClassName = " active";
+    var token = string.Empty;
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        var appSettings = Options.Value;
+        token = appSettings.GenerateJwtToken(await UserManager.GetUserAsync(User)).ToString();
+    }
 }
 
 <!DOCTYPE html>
@@ -12,16 +26,21 @@
     <title>@ViewData["Title"] - Florence Back Office</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/bootstrap-icons-1.2.2/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/lib/semantic-ui/dist/components/flag.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <noscript>
+        <link rel="stylesheet" href="~/css/noscript.css" />
+    </noscript>
+    @RenderSection("Styles", false)
 </head>
 <body>
+    <input type="hidden" id="tokenField" value="@token" />
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="~/img/logo-florence-100.png" height="50" class="d-inline-block" alt="">
-                    Back Office
+                    <img src="~/img/logo-florence-100.png" height="50" width="24" class="d-inline-block mr-2" alt="">
+                    <span class="align-middle">Back Office</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">

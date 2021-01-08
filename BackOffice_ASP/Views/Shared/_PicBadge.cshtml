@@ -1,0 +1,14 @@
+﻿@model BackOffice_ASP.Models.ApplicationUser
+
+@{
+    if (ViewData["size"] == null) ViewData["size"] = 30;
+}
+
+@if (Model != null)
+{
+    <img class="pic-badge rounded-circle mr-1"
+         src="@Url.Content(Model.AvatarUrl)"
+         height="@ViewData["size"]" width="@ViewData["size"]"
+         data-userId="@Model.Id"
+         alt="Avatar" />
+}
